@@ -1,35 +1,43 @@
-const express = require('express');
-const morgan = require('morgan');
-const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
-const cors = require('cors');
-const mongoose = require('mongoose');
-require('dotenv').config();
+const express = require("express");
+const morgan = require("morgan");
+const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
+const cors = require("cors");
+const mongoose = require("mongoose");
+require("dotenv").config();
 
-//app
+//bring in routes
+const blogRoutes = require("./routes/blog");
+const authRoutes = require("./routes/auth");
+
+// app
+
 const app = express();
 
-//database
-mongoose.connect(process.env.DATABASE_CLOUD, {
+//db
+mongoose
+  .connect(process.env.DATABASE_CLOUD, {
     useNewUrlParser: true,
     useCreateIndex: true,
     useFindAndModify: false,
     useUnifiedTopology: true
-}).then(() => console.log('Database connected'));
+  })
+  .then(() => console.log("Databse connected"));
 
+//middlewares
+app.use(morgan("dev"));
+app.use(bodyParser.json());
+app.use(cookieParser());
 
 //cors
-if(process.env.NODE_ENV === 'development'){
-    app.use(cors({origin: `${process.env.CLIENT_URL}`}));
+if (process.env.NODE_ENV === "development") {
+  app.use(cors({ origin: `${process.env.CLIENT_URL}` }));
 }
 
-//routes
-
-app.get('/', (req,res) => {
-    res.json({time: Date().toString()});
-})
+//route middlewares
+app.use("/api", blogRoutes);
+app.use("/api", authRoutes);
 
 //port
 const port = process.env.PORT || 8000;
-
-app.listen(port, () => console.log('Server is running at port 8000'))
+app.listen(port, () => console.log("Server is running"));
